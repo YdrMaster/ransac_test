@@ -63,7 +63,7 @@ struct point_t {
         return result;
     }
     
-    float norm(float n) const {
+    float norm(float n = 2) const {
         if (std::isnan(n) || n <= 0) throw std::logic_error("n must be positive");
         
         float result = 0;
