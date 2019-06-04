@@ -1,6 +1,11 @@
-﻿cmake_minimum_required(VERSION 3.14)
-project(ransac_test)
+﻿cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+project(ransac LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(HEADERS
+        src/main/ransac.h
+        src/main/random_engine.hpp
 
-add_executable(ransac_test main.cpp model.hpp random_engine.hpp ransac.h)
+        src/main/models/model_t.hpp
+        src/main/models/line_t.hpp)
+
+add_executable(ransac src/main.cpp ${HEADERS})

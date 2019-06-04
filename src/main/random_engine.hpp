@@ -2,8 +2,8 @@
 // Created by User on 2019/6/4.
 //
 
-#ifndef RANSAC_TEST_RANDOM_ENGINE_HPP
-#define RANSAC_TEST_RANDOM_ENGINE_HPP
+#ifndef RANSAC_RANDOM_ENGINE_HPP
+#define RANSAC_RANDOM_ENGINE_HPP
 
 
 #include <random>
@@ -40,4 +40,4 @@ public:
 };
 
 
-#endif //RANSAC_TEST_RANDOM_ENGINE_HPP
+#endif // RANSAC_RANDOM_ENGINE_HPP

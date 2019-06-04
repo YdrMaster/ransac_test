@@ -2,11 +2,11 @@
 // Created by User on 2019/6/4.
 //
 
-#ifndef RANSAC_TEST_RANSAC_H
-#define RANSAC_TEST_RANSAC_H
+#ifndef RANSAC_RANSAC_H
+#define RANSAC_RANSAC_H
 
 
-#include "model.hpp"
+#include "models/model_t.hpp"
 #include "random_engine.hpp"
 
 template<class _model_t>
@@ -40,17 +40,13 @@ ransac_result<_model_t> ransac(
         inliers{};
     
     _model_t best_model{}, model{};
-    size_t   best_count = 0;
     
     for (size_t i = 0; i < max_times; ++i) {
         for (size_t j = 0; j < initialize_list.size(); ++j)
             initialize_list[j] = data[random()];
         
         model.make(initialize_list);
-        if (!model.valid())
-            continue;
-        model.normalize();
-        if (best_model.valid() && model == best_model)
+        if (!model.is_valid() || (best_model.is_valid() && model == best_model))
             continue;
         
         std::transform(data.begin(), data.end(),
@@ -74,4 +70,4 @@ ransac_result<_model_t> ransac(
 }
 
 
-#endif //RANSAC_TEST_RANSAC_H
+#endif // RANSAC_RANSAC_H
