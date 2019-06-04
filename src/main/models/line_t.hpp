@@ -11,12 +11,12 @@
 template<size_t _dim>
 struct line_t final : public model_t<_dim, 2> {
 private:
+    static_assert(_dim >= 2, "line dimension is at least 2");
+    
     using super_t   = model_t<_dim, 2>;
     using __point_t = typename super_t::_point_t;
     
-    constexpr static auto float_equal = 1E-6f;
-    
-    float _square = 1;
+    float _square = -1;
 
 public:
     __point_t point0{}, point1{}, connect{};
@@ -32,7 +32,7 @@ public:
         auto connect0 = point - point0;
         if (connect0.norm(1) < float_equal) return 0;
         auto dot = connect0 * connect;
-        return std::sqrt(connect0.square() - dot * dot / _square);
+        return std::sqrtf(connect0.square() - dot * dot / _square);
     }
     
     bool is_valid() const final { return _square > float_equal; }
