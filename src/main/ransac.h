@@ -19,7 +19,8 @@ template<class _model_t>
 ransac_result<_model_t> ransac(
     const std::vector<typename _model_t::_point_t> &data,
     float threshold,
-    unsigned int max_times
+    float success_rate = 0.99f,
+    size_t max_times = std::numeric_limits<size_t>::max()
 ) {
     using tp = typename _model_t::_point_t;
     
@@ -39,9 +40,11 @@ ransac_result<_model_t> ransac(
     std::vector<size_t>
         inliers{};
     
+    const auto success_size = static_cast<size_t>(success_rate * data.size());
+    
     _model_t best_model{}, model{};
     
-    for (size_t i = 0; i < max_times; ++i) {
+    for (size_t i = 0; i < max_times && inliers.size() < success_size; ++i) {
         for (size_t j = 0; j < initialize_list.size(); ++j)
             initialize_list[j] = data[random()];
         

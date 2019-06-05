@@ -1,21 +1,24 @@
 ﻿#include <iostream>
 #include "main/ransac.h"
 #include "main/models/line_t.hpp"
+#include "main/models/plane_t.hpp"
 
 int main() {
-    std::vector<line_t<2>::_point_t> points{
-        {{0, 0}},
-        {{1, 1}},
-        {{2, 2}},
-        {{3, 6}},
-        {{4, 4}},
-        {{5, 5}},
-    };
+    std::vector<plane_t<3>::_point_t> points{};
     
-    auto result = ransac<line_t<2>>(points, .1f, 10);
+    random_engine<float> engine(-10, 10);
     
-    for (auto i : result.inliers)
-        std::cout << points[i] << std::endl;
+    for (auto j = 0; j < 10000; ++j) {
+        auto x = engine(),
+             y = engine(),
+             z = j % 4 ? -5 - 2 * x - 3 * y : engine();
+        points.push_back(point_t<3>{x, y, z});
+    }
+    
+    auto result = ransac<plane_t<3>>(points, .1f, 0.6f);
+    
+    std::cout << result.inliers.size() << std::endl;
+    std::cout << result.model.normal << std::endl;
     
     return 0;
 }

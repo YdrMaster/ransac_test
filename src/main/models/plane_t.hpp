@@ -9,34 +9,36 @@
 #include "model_t.hpp"
 
 template<size_t _dim>
-struct plane_t final : public model_t<_dim, _dim> {
-private:
-    static_assert(_dim >= 2, "plane dimension is at least 2");
-    
-    using super_t   = model_t<_dim, _dim>;
-    using __point_t = typename super_t::_point_t;
-    
-    float _norm = -1;
+struct plane_t final : public model_t<_dim, _dim> {};
 
-public:
-    __point_t normal{}; // 法向量
-    float     b = 0;    // 截距
+template<>
+struct plane_t<3> final : public model_t<3, 3> {
+    _point_t normal{NAN, NAN, NAN}, // 单位法向量
+             _point{};              // 平面上任一点
     
-    void make(const std::array<__point_t, super_t::size_to_make> &points) final {
-        _norm = normal.norm();
+    void make(const std::array<_point_t, size_to_make> &points) final {
+        const auto t0 = points[2] - points[0],
+                   t1 = points[1] - points[0];
+        _point = points[0];
+        normal = {+t0.y() * t1.z() - t1.y() * t0.z(),
+                  -t0.x() * t1.z() + t1.x() * t0.z(),
+                  +t0.x() * t1.y() - t1.x() * t0.y()};
+        auto norm = normal.norm();
+        if (norm < float_equal)
+            normal = {NAN, NAN, NAN};
+        else
+            normal /= norm;
     }
     
-    float operator()(const __point_t &point) const final {
-        return std::fabsf(normal * point + parameters.back()) / _norm;
+    float operator()(const _point_t &point) const final {
+        return std::fabsf(normal * (point - _point));
     }
     
-    bool is_valid() const final {
-        return _norm > float_equal;
-    }
+    bool is_valid() const final { return normal.is_valid(); }
     
     bool operator==(const plane_t &others) const {
-        return (normal - others.normal).norm(1) > float_equal
-               || std::fabsf(b - others.b) > float_equal;
+        return (normal - others.normal).norm(1) < float_equal
+               && (_point - others._point).norm(1) < float_equal;
     }
     
     bool operator!=(const plane_t &others) const {

@@ -24,6 +24,12 @@ struct point_t {
     
     float z() const { return values[2]; }
     
+    bool is_valid() const {
+        for (size_t i = 0; i < dim; ++i)
+            if (std::isnan(values[i])) return false;
+        return true;
+    }
+    
     point_t &operator+=(const point_t &others) {
         for (size_t i = 0; i < dim; ++i)
             values[i] += others.values[i];
@@ -36,6 +42,18 @@ struct point_t {
         return *this;
     }
     
+    point_t &operator*=(float k) {
+        for (size_t i = 0; i < dim; ++i)
+            values[i] *= k;
+        return *this;
+    }
+
+	point_t& operator/=(float k) {
+		for (size_t i = 0; i < dim; ++i)
+			values[i] /= k;
+		return *this;
+	}
+    
     point_t operator+(const point_t &others) const {
         point_t result = *this;
         return result += others;
@@ -45,6 +63,16 @@ struct point_t {
         point_t result = *this;
         return result -= others;
     }
+    
+    point_t operator*(const float &k) const {
+        point_t result = *this;
+        return result *= k;
+    }
+
+	point_t operator/(const float& k) const {
+		point_t result = *this;
+		return result /= k;
+	}
     
     float operator*(const point_t &others) const {
         float       result = 0;
