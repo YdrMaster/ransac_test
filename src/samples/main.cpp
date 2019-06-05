@@ -1,7 +1,7 @@
 ﻿#include <iostream>
-#include "main/ransac.h"
-#include "main/models/line_t.hpp"
-#include "main/models/plane_t.hpp"
+#include "../main/ransac.h"
+#include "../main/models/line_t.hpp"
+#include "../main/models/plane_t.hpp"
 
 int main() {
     std::vector<plane_t<3>::_point_t> points{};
