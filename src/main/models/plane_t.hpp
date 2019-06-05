@@ -31,7 +31,7 @@ struct plane_t<3> final : public model_t<3, 3> {
     }
     
     float operator()(const _point_t &point) const final {
-        return std::fabsf(normal * (point - _point));
+        return std::abs(normal * (point - _point));
     }
     
     bool is_valid() const final { return normal.is_valid(); }

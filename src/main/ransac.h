@@ -6,6 +6,7 @@
 #define RANSAC_RANSAC_H
 
 
+#include <algorithm>
 #include "models/model_t.hpp"
 #include "random_engine.hpp"
 
@@ -13,6 +14,7 @@ template<class _model_t>
 struct ransac_result {
     _model_t            model;
     std::vector<size_t> inliers;
+    float               rate;
 };
 
 template<class _model_t>
@@ -69,7 +71,7 @@ ransac_result<_model_t> ransac(
             if (check_buffer[i]) *ptr++ = i;
     }
     
-    return {best_model, inliers};
+    return {best_model, inliers, static_cast<float>(inliers.size()) / data.size()};
 }
 
 

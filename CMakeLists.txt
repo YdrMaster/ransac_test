@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(ransac LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(HEADERS
         src/main/ransac.h
         src/main/random_engine.hpp
@@ -10,8 +12,13 @@ set(HEADERS
         src/main/models/line_t.hpp
         src/main/models/plane_t.hpp)
 
-link_directories(extern-lib/PicoZenseSDK_Windows_20190316_V2.3.9.2_DCAM710/Bin/x86)
-link_directories(extern-lib/PicoZenseSDK_Windows_20190316_V2.3.9.2_DCAM710/Lib/x86)
+include_directories(/home/user/Documents/pico_sdk/Include)
+link_directories(/home/user/Documents/pico_sdk/Lib/x64)
 
-add_executable(ransac src/samples/pico.cpp src/samples/range.hpp ${HEADERS})
-target_link_libraries(ransac picozense_api)
+find_package(PCL 1.9 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+add_executable(ransac src/samples/main.cpp src/samples/range.hpp ${HEADERS})
+target_link_libraries(ransac picozense_api opencv_core opencv_highgui ${PCL_LIBRARIES})

@@ -94,8 +94,8 @@ struct point_t {
         if (std::isinf(n)) {
             for (auto item : values) result = std::fmaxf(std::abs(item), result);
         } else {
-            for (auto item : values) result += std::powf(std::abs(item), n);
-            result = std::powf(result, 1 / n);
+            for (auto item : values) result += std::pow(std::abs(item), n);
+            result = std::pow(result, 1 / n);
         }
         return result;
     }

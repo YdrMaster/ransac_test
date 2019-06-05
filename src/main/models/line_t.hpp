@@ -6,6 +6,8 @@
 #define RANSAC_LINE_T_HPP
 
 
+#include <cmath>
+
 #include "model_t.hpp"
 
 template<size_t _dim>
@@ -32,7 +34,7 @@ public:
         auto connect0 = point - point0;
         if (connect0.norm(1) < float_equal) return 0;
         auto dot = connect0 * connect;
-        return std::sqrtf(connect0.square() - dot * dot / _square);
+        return std::sqrt(connect0.square() - dot * dot / _square);
     }
     
     bool is_valid() const final { return _square > float_equal; }
