@@ -22,8 +22,7 @@ int main() {
     PsOpenDevice(0);
     PsSetDataMode(0, PsDepth_60);
     
-    PsFrame                           depth_frame;
-    std::vector<plane_t<3>::_point_t> points{};
+    PsFrame depth_frame;
     
     pcl::visualization::CloudViewer viewer("view");
     
@@ -36,19 +35,22 @@ int main() {
         const auto x0 = depth_frame.width / 2,
                    y0 = depth_frame.height / 2;
         const auto n  = depth_frame.height * depth_frame.width;
-        
-        auto depth_data  = (PsDepthPixel *) depth_frame.pFrameData;
+    
+        auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
+    
+        std::vector<plane_t<3>::_point_t> points{};
         
         for (auto i : range_t<size_t>(0, n - 1)) {
             if (depth_data[i] > 0)
                 points.emplace_back(point_t<3>{
-                    static_cast<float>(i % depth_frame.width - x0),
-                    static_cast<float>(y0 - i / depth_frame.width),
+                    static_cast<float>(i % depth_frame.width) - x0,
+                    y0 - static_cast<float>(i / depth_frame.width),
                     static_cast<float>(-depth_data[i])
                 });
         }
-        auto      time   = std::chrono::steady_clock::now();
-        auto      result = ransac<plane_t<3>>(points, 0.01f, 0.5, 100);
+    
+        auto time   = std::chrono::steady_clock::now();
+        auto result = ransac<plane_t<3>>(points, 5, 0.5, 32);
         std::cout << "----------------------------" << std::endl
                   << result.inliers.size() << std::endl
                   << n << std::endl
@@ -57,14 +59,12 @@ int main() {
         
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         cloud->resize(result.inliers.size());
-        for (auto i : result.inliers) {
-            if (depth_data[i] == 0) continue;
-            
+        for (size_t i = 0; i < result.inliers.size(); ++i) {
             pcl::PointXYZ point;
-            point.x = static_cast<float>((i % depth_frame.width) - x0);
-            point.y = static_cast<float>(y0 - (i / depth_frame.width));
-            point.z = static_cast<float>(-depth_data[i]);
-            
+            auto          t = result.inliers[i];
+            point.x = points[t].x();
+            point.y = points[t].y();
+            point.z = points[t].z();
             cloud->points[i] = point;
         }
         viewer.showCloud(cloud);

@@ -20,5 +20,5 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable(ransac src/samples/main.cpp src/samples/range.hpp ${HEADERS})
+add_executable(ransac src/samples/pico.cpp src/samples/range.hpp ${HEADERS})
 target_link_libraries(ransac picozense_api opencv_core opencv_highgui ${PCL_LIBRARIES})

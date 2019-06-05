@@ -24,7 +24,7 @@ struct plane_t<3> final : public model_t<3, 3> {
                   -t0.x() * t1.z() + t1.x() * t0.z(),
                   +t0.x() * t1.y() - t1.x() * t0.y()};
         auto norm = normal.norm();
-        if (norm < float_equal)
+        if (std::isfinite(norm) && norm < float_equal)
             normal = {NAN, NAN, NAN};
         else
             normal /= norm;
