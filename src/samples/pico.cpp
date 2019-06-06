@@ -20,11 +20,14 @@ int main() {
     if (count < 1) throw std::runtime_error("no camera");
     
     PsOpenDevice(0);
+    PsSetDepthRange(0, PsNearRange);
     PsSetDataMode(0, PsDepth_60);
     
     PsFrame depth_frame;
     
     pcl::visualization::CloudViewer viewer("view");
+    
+    plane_t<3> plane{};
     
     while (!viewer.wasStopped()) {
         PsReadNextFrame(0);
@@ -50,12 +53,14 @@ int main() {
         }
     
         auto time   = std::chrono::steady_clock::now();
-        auto result = ransac<plane_t<3>>(points, 5, 0.5, 32);
+        auto result = ransac<plane_t<3>>(points, 10, 0.5, 32, plane);
         std::cout << "----------------------------" << std::endl
-                  << result.inliers.size() << std::endl
-                  << n << std::endl
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
+                  << "rate:   " << result.rate << std::endl
+                  << "normal: " << result.model.normal << std::endl
+                  << "time:   " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
                   << std::endl;
+    
+        plane = result.model;
         
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
         cloud->resize(result.inliers.size());

@@ -11,18 +11,19 @@
 #include "random_engine.hpp"
 
 template<class _model_t>
-struct ransac_result {
-    _model_t            model;
-    std::vector<size_t> inliers;
-    float               rate;
+struct ransac_result_t {
+    _model_t            model{};
+    std::vector<size_t> inliers{};
+    float               rate = 0;
 };
 
 template<class _model_t>
-ransac_result<_model_t> ransac(
-    const std::vector<typename _model_t::_point_t> &data,
-    float threshold,
-    float success_rate = 0.99f,
-    size_t max_times = std::numeric_limits<size_t>::max()
+ransac_result_t<_model_t>
+ransac(const std::vector<typename _model_t::_point_t> &data,
+       float threshold,
+       float success_rate = 0.99f,
+       size_t max_times = std::numeric_limits<size_t>::max(),
+       const _model_t &guess = _model_t{}
 ) {
     using tp = typename _model_t::_point_t;
     
@@ -43,10 +44,23 @@ ransac_result<_model_t> ransac(
         inliers{};
     
     const auto success_size = static_cast<size_t>(success_rate * data.size());
+    _model_t   best_model   = guess,
+               model{};
     
-    _model_t best_model{}, model{};
+    if (best_model.is_valid()) {
+        std::transform(data.begin(), data.end(), check_buffer.begin(),
+                       [=](const tp &point) { return std::abs(best_model(point)) < threshold; });
+        
+        size_t count = std::count(check_buffer.begin(), check_buffer.end(), true);
+        
+        inliers.resize(count);
+        
+        auto        ptr = inliers.begin();
+        for (size_t i   = 0; i < check_buffer.size(); ++i)
+            if (check_buffer[i]) *ptr++ = i;
+    }
     
-    for (size_t i = 0; i < max_times && inliers.size() < success_size; ++i) {
+    for (; max_times > 0 && inliers.size() < success_size; --max_times) {
         for (size_t j = 0; j < initialize_list.size(); ++j)
             initialize_list[j] = data[random()];
         
@@ -54,11 +68,8 @@ ransac_result<_model_t> ransac(
         if (!model.is_valid() || (best_model.is_valid() && model == best_model))
             continue;
         
-        std::transform(data.begin(), data.end(),
-                       check_buffer.begin(),
-                       [&](const tp &point) {
-                           return std::abs(model(point)) < threshold;
-                       });
+        std::transform(data.begin(), data.end(), check_buffer.begin(),
+                       [=](const tp &point) { return std::abs(model(point)) < threshold; });
         
         size_t count = std::count(check_buffer.begin(), check_buffer.end(), true);
         if (count <= inliers.size()) continue;
