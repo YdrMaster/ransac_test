@@ -12,6 +12,8 @@
 
 #include "range.hpp"
 
+constexpr auto display_range = 20; // mm
+
 int main() {
     PsInitialize();
     
@@ -21,56 +23,87 @@ int main() {
     
     PsOpenDevice(0);
     PsSetDepthRange(0, PsNearRange);
-    PsSetDataMode(0, PsDepth_60);
+    PsSetDataMode(0, PsDepthAndRGB_30);
+    PsSetMapperEnabledDepthToRGB(0, true);
     
-    PsFrame depth_frame;
-    
-    pcl::visualization::CloudViewer viewer("view");
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::visualization::CloudViewer        viewer("view");
     
     plane_t<3> plane{};
+    
+    PsFrame depth_frame, rgb_frame;
     
     while (!viewer.wasStopped()) {
         PsReadNextFrame(0);
         PsGetFrame(0, PsDepthFrame, &depth_frame);
-        
-        if (!depth_frame.pFrameData) continue;
+        PsGetFrame(0, PsMappedRGBFrame, &rgb_frame);
+    
+        if (!depth_frame.pFrameData || !rgb_frame.pFrameData) continue;
         
         const auto x0 = depth_frame.width / 2,
                    y0 = depth_frame.height / 2;
         const auto n  = depth_frame.height * depth_frame.width;
     
         auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
-    
+        auto rgb_data   = (PsBGR888Pixel *) rgb_frame.pFrameData;
+        
         std::vector<plane_t<3>::_point_t> points{};
+        std::vector<PsBGR888Pixel>        rgbs{};
         
         for (auto i : range_t<size_t>(0, n - 1)) {
-            if (depth_data[i] > 0)
-                points.emplace_back(point_t<3>{
-                    static_cast<float>(i % depth_frame.width) - x0,
-                    y0 - static_cast<float>(i / depth_frame.width),
-                    static_cast<float>(-depth_data[i])
-                });
+            float x = static_cast<float>(i % depth_frame.width) - x0,
+                  y = y0 - static_cast<float>(i / depth_frame.width),
+                  z = static_cast<float>(-depth_data[i]);
+    
+            if (depth_data[i] > 0) {
+                points.emplace_back(point_t<3>{x, y, z});
+                rgbs.push_back(rgb_data[i]);
+            }
         }
     
-        auto time   = std::chrono::steady_clock::now();
-        auto result = ransac<plane_t<3>>(points, 10, 0.5, 32, plane);
-        std::cout << "----------------------------" << std::endl
-                  << "rate:   " << result.rate << std::endl
-                  << "normal: " << result.model.normal << std::endl
-                  << "time:   " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
-                  << std::endl;
+        auto time = std::chrono::steady_clock::now();
+    
+        ransac_result_t<plane_t<3>> result{};
+        try {
+            result = ransac<plane_t<3>>(points, 10, 0.5, 16, plane);
+        } catch (std::exception &e) {
+            continue;
+        }
+    
+        auto normal = result.model.normal.y() > 0
+                      ? result.model.normal
+                      : result.model.normal * -1;
     
         plane = result.model;
         
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        cloud->resize(result.inliers.size());
-        for (size_t i = 0; i < result.inliers.size(); ++i) {
-            pcl::PointXYZ point;
-            auto          t = result.inliers[i];
-            point.x = points[t].x();
-            point.y = points[t].y();
-            point.z = points[t].z();
-            cloud->points[i] = point;
+        std::cout << "----------------------------" << std::endl
+                  << "rate:   " << result.rate << std::endl
+                  << "normal: " << normal << std::endl
+                  << "fps:    " << 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
+                  << std::endl;
+    
+        if (result.rate < 0.05) continue;
+    
+        cloud->clear();
+        for (int i = 0; i < points.size(); ++i) {
+            auto point = points[i];
+            auto rgb   = rgbs[i];
+        
+            pcl::PointXYZRGB temp;
+            temp.x = point.x();
+            temp.y = point.y();
+            temp.z = point.z();
+            if (plane(point) < display_range) {
+                temp.r = 0;
+                temp.g = 128;
+                temp.b = 0;
+            } else {
+                temp.r = std::min(255, 32 + rgb.r);
+                temp.g = std::min(255, 32 + rgb.g);
+                temp.b = std::min(255, 32 + rgb.b);
+            }
+        
+            cloud->points.push_back(temp);
         }
         viewer.showCloud(cloud);
     }

@@ -47,12 +47,12 @@ struct point_t {
             values[i] *= k;
         return *this;
     }
-
-	point_t& operator/=(float k) {
-		for (size_t i = 0; i < dim; ++i)
-			values[i] /= k;
-		return *this;
-	}
+    
+    point_t &operator/=(float k) {
+        for (size_t i = 0; i < dim; ++i)
+            values[i] /= k;
+        return *this;
+    }
     
     point_t operator+(const point_t &others) const {
         point_t result = *this;
@@ -68,11 +68,11 @@ struct point_t {
         point_t result = *this;
         return result *= k;
     }
-
-	point_t operator/(const float& k) const {
-		point_t result = *this;
-		return result /= k;
-	}
+    
+    point_t operator/(const float &k) const {
+        point_t result = *this;
+        return result /= k;
+    }
     
     float operator*(const point_t &others) const {
         float       result = 0;
