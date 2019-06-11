@@ -1,0 +1,4 @@
+rm -rf build
+mkdir build
+cd build
+CUDACXX=/usr/local/cuda-10.0/bin/nvcc cmake -DCMAKE_BUILD_TYPE=Release .. && make && ./ransac
