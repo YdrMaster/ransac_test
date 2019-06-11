@@ -4,7 +4,6 @@ project(ransac LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 set(HEADERS
-        src/main/ransac.h
         src/main/random_engine.hpp
 
         src/main/models/point_t.hpp
@@ -12,13 +11,13 @@ set(HEADERS
         src/main/models/line_t.hpp
         src/main/models/plane_t.hpp)
 
-include_directories(/home/user/Documents/pico_sdk/Include)
-link_directories(/home/user/Documents/pico_sdk/Lib/x64)
+#include_directories(/home/user/Documents/pico_sdk/Include)
+#link_directories(/home/user/Documents/pico_sdk/Lib/x64)
 
-find_package(PCL 1.9 REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+#find_package(PCL 1.9 REQUIRED)
+#include_directories(${PCL_INCLUDE_DIRS})
+#link_directories(${PCL_LIBRARY_DIRS})
+#add_definitions(${PCL_DEFINITIONS})
 
-add_executable(ransac src/samples/pico.cpp src/samples/range.hpp ${HEADERS})
-target_link_libraries(ransac picozense_api opencv_core opencv_highgui ${PCL_LIBRARIES})
+add_executable(ransac src/samples/main.cpp src/main/ransac.h src/samples/range.hpp ${HEADERS})
+#target_link_libraries(ransac picozense_api opencv_core opencv_highgui ${PCL_LIBRARIES})
