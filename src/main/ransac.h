@@ -27,63 +27,60 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
        const _model_t &guess = _model_t{}
 ) {
     using tp = typename _model_t::super_t::_point_t;
+    using ti = decltype(data.size());
     
-    if (data.size() < 2 * _model_t::super_t::size_to_make)
+    const auto size         = data.size(),
+               success_size = static_cast<ti>(success_rate * size);
+    
+    if (size < 2 * _model_t::super_t::size_to_make)
         throw std::logic_error("samples too little");
     
     // 随机数引擎
-    random_engine<decltype(data.size())>
-        random(0, data.size() - 1);
+    random_engine<ti>
+         random(0, size - 1);
     // 模型初始化器
     std::array<tp, _model_t::super_t::size_to_make>
-        initialize_list{};
+         initialize_list{};
     // 缓存
-    std::vector<bool>
-        check_buffer(data.size());
-    // 局内点
-    std::vector<size_t>
-        inliers{};
+    bool check_buffer[size];
     
-    const auto success_size = static_cast<size_t>(success_rate * data.size());
-    _model_t   best_model   = guess,
-               model{};
+    ti       count      = 0;
+    _model_t best_model = guess,
+             model{};
     
     if (best_model.is_valid()) {
-        std::transform(data.begin(), data.end(), check_buffer.begin(),
+        std::transform(data.data(), data.data() + size, check_buffer,
                        [=](const tp &point) { return std::abs(best_model(point)) < threshold; });
-        
-        size_t count = std::count(check_buffer.begin(), check_buffer.end(), true);
-        
-        inliers.resize(count);
-        
-        auto        ptr = inliers.begin();
-        for (size_t i   = 0; i < check_buffer.size(); ++i)
-            if (check_buffer[i]) *ptr++ = i;
+    
+        count = std::count(check_buffer, check_buffer + size, true);
     }
     
-    for (; max_times > 0 && inliers.size() < success_size; --max_times) {
-        for (size_t j = 0; j < initialize_list.size(); ++j)
-            initialize_list[j] = data[random()];
+    for (; max_times > 0 && count < success_size; --max_times) {
+        for (ti i = 0; i < initialize_list.size(); ++i)
+            initialize_list[i] = data[random()];
         
         model.make(initialize_list);
         if (!model.is_valid() || (best_model.is_valid() && model == best_model))
             continue;
         
-        std::transform(data.begin(), data.end(), check_buffer.begin(),
+        std::transform(data.data(), data.data() + size, check_buffer,
                        [=](const tp &point) { return std::abs(model(point)) < threshold; });
         
-        size_t count = std::count(check_buffer.begin(), check_buffer.end(), true);
-        if (count <= inliers.size()) continue;
-        
-        best_model = model;
-        inliers.resize(count);
-        
-        auto        ptr = inliers.begin();
-        for (size_t i   = 0; i < check_buffer.size(); ++i)
-            if (check_buffer[i]) *ptr++ = i;
+        ti temp = std::count(check_buffer, check_buffer + size, true);
+        if (temp > count) {
+            count      = temp;
+            best_model = model;
+        }
     }
     
-    return {best_model, inliers, static_cast<float>(inliers.size()) / data.size()};
+    // 局内点
+    std::vector<ti> inliers(count);
+    
+    auto    ptr = inliers.begin();
+    for (ti i   = 0; i < size; ++i)
+        if (check_buffer[i]) *ptr++ = i;
+    
+    return {best_model, inliers, static_cast<float>(inliers.size()) / size};
 }
 
 
