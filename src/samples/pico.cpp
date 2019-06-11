@@ -46,9 +46,9 @@ int main() {
     
         auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
         auto rgb_data   = (PsBGR888Pixel *) rgb_frame.pFrameData;
-        
-        std::vector<plane_t<3>::_point_t> points{};
-        std::vector<PsBGR888Pixel>        rgbs{};
+    
+        std::vector<point_t<3>>    points{};
+        std::vector<PsBGR888Pixel> rgbs{};
         
         for (auto i : range_t<size_t>(0, n - 1)) {
             float x = static_cast<float>(i % depth_frame.width) - x0,
@@ -70,16 +70,12 @@ int main() {
             continue;
         }
     
-        auto normal = result.model.normal.y() > 0
-                      ? result.model.normal
-                      : result.model.normal * -1;
-    
         plane = result.model;
         
         std::cout << "----------------------------" << std::endl
-                  << "rate:   " << result.rate << std::endl
-                  << "normal: " << normal << std::endl
-                  << "fps:    " << 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
+                  << "rate:  " << result.rate << std::endl
+                  << "plane: " << plane << std::endl
+                  << "fps:   " << 1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time).count()
                   << std::endl;
     
         if (result.rate < 0.05) continue;
@@ -88,7 +84,7 @@ int main() {
         for (int i = 0; i < points.size(); ++i) {
             auto point = points[i];
             auto rgb   = rgbs[i];
-        
+    
             pcl::PointXYZRGB temp;
             temp.x = point.x();
             temp.y = point.y();
@@ -102,7 +98,7 @@ int main() {
                 temp.g = std::min(255, 32 + rgb.g);
                 temp.b = std::min(255, 32 + rgb.b);
             }
-        
+    
             cloud->points.push_back(temp);
         }
         viewer.showCloud(cloud);

@@ -6,6 +6,8 @@
 #define RANSAC_POINT_T_HPP
 
 
+#include <cmath>
+
 template<size_t _dim>
 struct point_t {
     float values[_dim]{};
@@ -24,10 +26,14 @@ struct point_t {
     
     float z() const { return values[2]; }
     
+    float &operator[](size_t i) { return values[i]; }
+    
+    float operator[](size_t i) const { return values[i]; }
+    
+    void fill(float value) { std::fill(values, values + dim, value); }
+    
     bool is_valid() const {
-        for (size_t i = 0; i < dim; ++i)
-            if (std::isnan(values[i])) return false;
-        return true;
+        return std::find(values, values + dim, [](float value) { return std::isfinite(value); }) != values + dim;
     }
     
     point_t &operator+=(const point_t &others) {
@@ -117,8 +123,8 @@ std::ostream &operator<<(std::ostream &ostream, const point_t<_dim> &point) {
     ostream << "(";
     size_t i = 0;
     while (i < _dim - 1)
-        ostream << point.values[i++] << ", ";
-    ostream << point.values[i] << ")";
+        ostream << point[i++] << ", ";
+    ostream << point[i] << ")";
     return ostream;
 }
 

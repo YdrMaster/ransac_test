@@ -6,6 +6,7 @@
 #define RANSAC_RANSAC_H
 
 
+#include <array>
 #include <algorithm>
 #include "models/model_t.hpp"
 #include "random_engine.hpp"
@@ -19,22 +20,22 @@ struct ransac_result_t {
 
 template<class _model_t>
 ransac_result_t<_model_t>
-ransac(const std::vector<typename _model_t::_point_t> &data,
+ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
        float threshold,
        float success_rate = 0.99f,
        size_t max_times = std::numeric_limits<size_t>::max(),
        const _model_t &guess = _model_t{}
 ) {
-    using tp = typename _model_t::_point_t;
+    using tp = typename _model_t::super_t::_point_t;
     
-    if (data.size() < 2 * _model_t::size_to_make)
+    if (data.size() < 2 * _model_t::super_t::size_to_make)
         throw std::logic_error("samples too little");
     
     // 随机数引擎
     random_engine<decltype(data.size())>
         random(0, data.size() - 1);
     // 模型初始化器
-    std::array<tp, _model_t::size_to_make>
+    std::array<tp, _model_t::super_t::size_to_make>
         initialize_list{};
     // 缓存
     std::vector<bool>

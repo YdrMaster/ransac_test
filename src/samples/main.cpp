@@ -6,7 +6,7 @@
 constexpr size_t n = 2000000;
 
 int main() {
-    std::vector<plane_t<3>::_point_t> points(n);
+    std::vector<point_t<3>> points(n);
     
     random_engine<float>
         engine(-10, 10),
@@ -24,7 +24,7 @@ int main() {
         auto result = ransac<plane_t<3>>(points, .1f, 1.0f / 3, 20);
         
         std::cout << result.rate << std::endl;
-        std::cout << result.model.normal << std::endl;
+        std::cout << result.model << std::endl;
     }
     
     return 0;

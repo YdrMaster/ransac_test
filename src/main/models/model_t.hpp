@@ -6,10 +6,6 @@
 #define RANSAC_MODEL_T_HPP
 
 
-#include <vector>
-#include <array>
-#include <cmath>
-
 #include "point_t.hpp"
 
 constexpr static auto float_equal = 1E-6f;
@@ -30,11 +26,17 @@ template<
         point_dim    = _point_dim,
         size_to_make = _size_to_make;
     
-    virtual void make(const std::array<_point_t, size_to_make> &) = 0;
-    
-    virtual float operator()(const _point_t &) const = 0;
-    
-    virtual bool is_valid() const = 0;
+    // =====================
+    // void make(const std::array<_point_t, size_to_make> &)
+    //
+    // float operator()(const _point_t &) const
+    //
+    // bool is_valid() const
+    //
+    // bool operator==(const model_t &) const
+    //
+    // bool operator!=(const model_t &) const
+    // =====================
 };
 
 
