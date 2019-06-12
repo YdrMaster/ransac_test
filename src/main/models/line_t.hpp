@@ -28,7 +28,7 @@ public:
         connect{};
     
     void make(const std::array<typename super_t::_point_t,
-                               super_t::size_to_make> &points) {
+              super_t::size_to_make> &points) {
         point0  = points[0];
         point1  = points[1];
         connect = points[1] - points[0];

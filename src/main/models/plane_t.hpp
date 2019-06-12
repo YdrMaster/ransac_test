@@ -53,12 +53,12 @@ public:
     
     BOTH bool is_valid() const { return square > 0; }
     
-    bool operator==(const _plane_t &others) const {
+    BOTH bool operator==(const _plane_t &others) const {
         return (normal - others.normal).norm(1) < float_equal
                && std::abs(b - others.b) < float_equal;
     }
     
-    bool operator!=(const _plane_t &others) const {
+    BOTH bool operator!=(const _plane_t &others) const {
         return !operator==(others);
     }
     
@@ -67,6 +67,11 @@ public:
         std::copy(normal.values, normal.values + dim, result.begin());
         result[dim - 1] = b;
         return result;
+    }
+
+    BOTH void parameters(float *dest) const {
+        std::copy(normal.values, normal.values + dim, dest);
+        dest[dim - 1] = b;
     }
 };
 
@@ -84,7 +89,7 @@ public:
     using super_t = model_t<3, 3>;
     
     void make(const std::array<typename super_t::_point_t,
-                               super_t::size_to_make> &points) {
+              super_t::size_to_make> &points) {
         const auto t0 = points[2] - points[0],
                    t1 = points[1] - points[0];
         core.make(point_t<3>{+t0.y() * t1.z() - t1.y() * t0.z(),

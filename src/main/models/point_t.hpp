@@ -94,8 +94,13 @@ struct point_t {
         return result;
     }
     
-    float norm(float n = 2) const {
-        if (std::isnan(n) || n <= 0) throw std::logic_error("n must be positive");
+    BOTH float norm(float n = 2) const {
+        if (std::isnan(n) || n <= 0)
+        #ifndef __CUDACC__
+            throw std::logic_error("n must be positive");
+        #else
+            return NAN;
+        #endif
         
         float result = 0;
         if (std::isinf(n)) {
