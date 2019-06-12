@@ -15,7 +15,7 @@ int main() {
     int count;
     PsGetDeviceCount(&count);
     if (count < 1) throw std::runtime_error("no camera");
-
+    
     std::cout << "started" << std::endl;
     
     PsOpenDevice(0);
@@ -59,7 +59,7 @@ int main() {
     
         ransac_result_t<plane_t<3>> result{};
         try {
-            result = ransac<plane_t<3>>(points, 10, 0.5, 32, plane);
+            result = ransac<plane_t<3>>(points, 10, 0.5, 16, plane);
         } catch (std::exception &e) {
             continue;
         }

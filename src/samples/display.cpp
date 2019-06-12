@@ -22,7 +22,7 @@ int main() {
     if (count < 1) throw std::runtime_error("no camera");
     
     std::cout << "started" << std::endl;
-
+    
     PsOpenDevice(0);
     PsSetDepthRange(0, PsNearRange);
     PsSetDataMode(0, PsDepthAndRGB_30);

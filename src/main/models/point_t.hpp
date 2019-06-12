@@ -95,12 +95,13 @@ struct point_t {
     }
     
     BOTH float norm(float n = 2) const {
-        if (std::isnan(n) || n <= 0)
-        #ifndef __CUDACC__
+        if (std::isnan(n) || n <= 0) {
+            #ifndef __CUDACC__
             throw std::logic_error("n must be positive");
-        #else
+            #else
             return NAN;
-        #endif
+            #endif
+        }
         
         float result = 0;
         if (std::isinf(n)) {
@@ -126,13 +127,13 @@ struct point_t {
 
 template<size_t _dim>
 std::ostream &operator<<(std::ostream &ostream, const point_t<_dim> &point) {
-#ifndef __CUDACC__
+    #ifndef __CUDACC__
     ostream << '(';
     size_t i = 0;
     while (i < _dim - 1)
         ostream << point[i++] << ", ";
     ostream << point[i] << ')';
-#endif
+    #endif
     return ostream;
 }
 

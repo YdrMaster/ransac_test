@@ -37,8 +37,7 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
         throw std::logic_error("samples too little");
     
     // 随机数引擎
-    random_engine<ti>
-                      random(0, size - 1);
+    random_engine<ti> random(0, size - 1);
     // 模型初始化器
     std::array<tp, _model_t::super_t::size_to_make>
                       initialize_list{};
@@ -57,8 +56,8 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
     }
     
     for (; max_times > 0 && count < success_size; --max_times) {
-        for (ti i = 0; i < initialize_list.size(); ++i)
-            initialize_list[i] = data[random()];
+        for (auto &item : initialize_list)
+            item = data[random()];
         
         model.make(initialize_list);
         if (!model.is_valid() || (best_model.is_valid() && model == best_model))
@@ -67,7 +66,7 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
         std::transform(data.begin(), data.end(), check_buffer.begin(),
                        [=](const tp &point) { return std::abs(model(point)) < threshold; });
     
-        ti temp = std::count(check_buffer.begin(), check_buffer.end(), true);
+        auto temp = std::count(check_buffer.begin(), check_buffer.end(), true);
         if (temp > count) {
             count      = temp;
             best_model = model;

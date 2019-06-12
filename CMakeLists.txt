@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
-project(ransac LANGUAGES CXX CUDA)
+project(ransac LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -12,13 +12,13 @@ set(HEADERS
         src/main/models/plane_t.hpp)
 
 include_directories(/home/user/Documents/pico_sdk/Include)
-link_directories(/home/user/Documents/pico_sdk/Lib)
+link_directories(/home/user/Documents/pico_sdk/Lib/x64)
 
-#find_package(PCL 1.9 REQUIRED)
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
+find_package(PCL 1.9 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
-add_executable(ransac src/samples/pico.cu src/main/ransac.cu src/samples/range.hpp ${HEADERS})
+add_executable(ransac src/samples/pico.cpp src/main/ransac.h src/samples/range.hpp ${HEADERS})
 target_link_libraries(ransac picozense_api)
 #target_link_libraries(ransac ${PCL_LIBRARIES})
