@@ -11,13 +11,14 @@ set(HEADERS
         src/main/models/line_t.hpp
         src/main/models/plane_t.hpp)
 
-#include_directories(/home/user/Documents/pico_sdk/Include)
-#link_directories(/home/user/Documents/pico_sdk/Lib/x64)
+include_directories(/home/user/Documents/pico_sdk/Include)
+link_directories(/home/user/Documents/pico_sdk/Lib)
 
-#find_package(PCL 1.9 REQUIRED)
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
+find_package(PCL 1.9 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
-add_executable(ransac src/samples/main.cpp src/main/ransac.h src/samples/range.hpp ${HEADERS})
-#target_link_libraries(ransac picozense_api opencv_core opencv_highgui ${PCL_LIBRARIES})
+add_executable(ransac src/samples/display.cpp src/main/ransac.h src/samples/range.hpp ${HEADERS})
+target_link_libraries(ransac picozense_api)
+target_link_libraries(ransac ${PCL_LIBRARIES})

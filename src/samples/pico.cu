@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <chrono>
 
-#include "../main/ransac.h"
+#include "../main/ransac.cu"
 #include "../main/models/line_t.hpp"
 #include "../main/models/plane_t.hpp"
 
@@ -15,9 +15,9 @@ int main() {
     int count;
     PsGetDeviceCount(&count);
     if (count < 1) throw std::runtime_error("no camera");
-
-    std::cout << "started" << std::endl;
     
+    std::cout << "started" << std::endl;
+
     PsOpenDevice(0);
     PsSetDepthRange(0, PsNearRange);
     PsSetDataMode(0, PsDepthAndRGB_30);

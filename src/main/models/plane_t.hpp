@@ -6,6 +6,7 @@
 #define RANSAC_PLANE_T_HPP
 
 
+#include "macro.h"
 #include "model_t.hpp"
 
 template<size_t _dim>
@@ -45,12 +46,12 @@ public:
         }
     }
     
-    float operator()(const typename super_t::_point_t &point) const {
+    BOTH float operator()(const typename super_t::_point_t &point) const {
         return square > 0 ? std::abs(normal * point + b) / square
                           : NAN;
     }
     
-    bool is_valid() const { return square > 0; }
+    BOTH bool is_valid() const { return square > 0; }
     
     bool operator==(const _plane_t &others) const {
         return (normal - others.normal).norm(1) < float_equal
@@ -92,23 +93,23 @@ public:
                   points[0]);
     }
     
-    float operator()(const typename super_t::_point_t &point) const {
+    BOTH float operator()(const typename super_t::_point_t &point) const {
         return core(point);
     }
     
-    bool is_valid() const {
+    BOTH bool is_valid() const {
         return core.is_valid();
     }
     
-    bool operator==(const plane_t &others) const {
+    BOTH bool operator==(const plane_t &others) const {
         return core == others.core;
     }
     
-    bool operator!=(const plane_t &others) const {
+    BOTH bool operator!=(const plane_t &others) const {
         return core != others.core;
     }
     
-    std::vector<float> parameters() const {
+    BOTH std::vector<float> parameters() const {
         return core.parameters();
     }
 };

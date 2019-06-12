@@ -21,10 +21,13 @@ struct ransac_result_t {
     float               rate = 0;
 };
 
-template<class ptr_i_t, class ptr_o_t, class function_t>
-__global__ void map(ptr_i_t ptr_i, ptr_o_t ptr_o, function_t function) {
+template<class _model_t>
+__global__ void map(typename _model_t::super_t::_point_t *ptr_i,
+                    bool *ptr_o, 
+                    _model_t model,
+                    float threshold) {
     const int i = blockIdx.x*blockDim.x + threadIdx.x;
-    ptr_o[i] = function(ptr_i[i]);
+    ptr_o[i] = std::abs(model(ptr_i[i])) < threshold;
 }
 
 template<class _model_t>
@@ -56,15 +59,16 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
     
     cudaMallocManaged(&point_buffer, size * sizeof(tp));
     cudaMallocManaged(&check_buffer, size * sizeof(bool));
+
+    std::copy(data.begin(), data.end(), point_buffer);
 		
     ti       count      = 0;
     _model_t best_model = guess,
              model{};
     
     if (best_model.is_valid()) {
-        map<<<(size - 1) / 32 + 1, 32>>>(point_buffer, check_buffer,
-                                         [=](const tp &point) { return std::abs(best_model(point)) < threshold; });
-	cudaDeviceSynchronize();
+        map<<<(size - 1) / 32 + 1, 32>>>(point_buffer, check_buffer, best_model, threshold);
+	    cudaDeviceSynchronize();
     
         count = std::count(check_buffer, check_buffer + size, true);
     }
@@ -77,9 +81,8 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
         if (!model.is_valid() || (best_model.is_valid() && model == best_model))
             continue;
         
-        map<<<(size - 1) / 32 + 1, 32>>>(point_buffer, check_buffer,
-                                         [=](const tp &point) { return std::abs(best_model(point)) < threshold; });
-	cudaDeviceSynchronize();
+        map<<<(size - 1) / 32 + 1, 32>>>(point_buffer, check_buffer, model, threshold);
+	    cudaDeviceSynchronize();
         
         ti temp = std::count(check_buffer, check_buffer + size, true);
         if (temp > count) {
@@ -88,17 +91,18 @@ ransac(const std::vector<typename _model_t::super_t::_point_t> &data,
         }
     }
     
-    cudaFree(point_buffer);
-    cudaFree(check_buffer);
-
     // 局内点
     std::vector<ti> inliers(count);
     
     auto    ptr = inliers.begin();
     for (ti i   = 0; i < size; ++i)
         if (check_buffer[i]) *ptr++ = i;
+
+    cudaFree(point_buffer);
+    cudaFree(check_buffer);
     
-    return {best_model, inliers, static_cast<float>(inliers.size()) / size};
+    auto rate = static_cast<float>(inliers.size()) / size;
+    return {best_model, std::move(inliers), rate};
 }
 
 

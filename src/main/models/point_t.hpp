@@ -6,6 +6,7 @@
 #define RANSAC_POINT_T_HPP
 
 
+#include "macro.h"
 #include <cmath>
 
 template<size_t _dim>
@@ -14,80 +15,80 @@ struct point_t {
     
     constexpr static auto dim = _dim;
     
-    float &x() { return values[0]; }
+    BOTH float &x() { return values[0]; }
     
-    float &y() { return values[1]; }
+    BOTH float &y() { return values[1]; }
     
-    float &z() { return values[2]; }
+    BOTH float &z() { return values[2]; }
     
-    float x() const { return values[0]; }
+    BOTH float x() const { return values[0]; }
     
-    float y() const { return values[1]; }
+    BOTH float y() const { return values[1]; }
     
-    float z() const { return values[2]; }
+    BOTH float z() const { return values[2]; }
     
-    float &operator[](size_t i) { return values[i]; }
+    BOTH float &operator[](size_t i) { return values[i]; }
     
-    float operator[](size_t i) const { return values[i]; }
+    BOTH float operator[](size_t i) const { return values[i]; }
     
-    void fill(float value) { std::fill(values, values + dim, value); }
+    BOTH void fill(float value) { std::fill(values, values + dim, value); }
     
-    bool is_valid() const {
+    BOTH bool is_valid() const {
         return std::find(values, values + dim, [](float value) { return std::isfinite(value); }) != values + dim;
     }
     
-    point_t &operator+=(const point_t &others) {
+    BOTH point_t &operator+=(const point_t &others) {
         for (size_t i = 0; i < dim; ++i)
             values[i] += others.values[i];
         return *this;
     }
     
-    point_t &operator-=(const point_t &others) {
+    BOTH point_t &operator-=(const point_t &others) {
         for (size_t i = 0; i < dim; ++i)
             values[i] -= others.values[i];
         return *this;
     }
     
-    point_t &operator*=(float k) {
+    BOTH point_t &operator*=(float k) {
         for (size_t i = 0; i < dim; ++i)
             values[i] *= k;
         return *this;
     }
     
-    point_t &operator/=(float k) {
+    BOTH point_t &operator/=(float k) {
         for (size_t i = 0; i < dim; ++i)
             values[i] /= k;
         return *this;
     }
     
-    point_t operator+(const point_t &others) const {
+    BOTH point_t operator+(const point_t &others) const {
         point_t result = *this;
         return result += others;
     }
     
-    point_t operator-(const point_t &others) const {
+    BOTH point_t operator-(const point_t &others) const {
         point_t result = *this;
         return result -= others;
     }
     
-    point_t operator*(const float &k) const {
+    BOTH point_t operator*(const float &k) const {
         point_t result = *this;
         return result *= k;
     }
     
-    point_t operator/(const float &k) const {
+    BOTH point_t operator/(const float &k) const {
         point_t result = *this;
         return result /= k;
     }
     
-    float operator*(const point_t &others) const {
+    BOTH float operator*(const point_t &others) const {
         float       result = 0;
         for (size_t i      = 0; i < dim; ++i)
             result += values[i] * others.values[i];
         return result;
     }
     
-    float square() const {
+    BOTH float square() const {
         float     result = 0;
         for (auto item : values) result += item * item;
         return result;
@@ -106,25 +107,27 @@ struct point_t {
         return result;
     }
     
-    bool operator==(const point_t &others) const {
+    BOTH bool operator==(const point_t &others) const {
         for (auto i = 0; i < _dim; ++i)
             if (values[i] != others.values[i])
                 return false;
         return true;
     }
     
-    bool operator!=(const point_t &others) const {
+    BOTH bool operator!=(const point_t &others) const {
         return !operator==(others);
     }
 };
 
 template<size_t _dim>
 std::ostream &operator<<(std::ostream &ostream, const point_t<_dim> &point) {
-    ostream << "(";
+#ifndef __CUDACC__
+    ostream << '(';
     size_t i = 0;
     while (i < _dim - 1)
         ostream << point[i++] << ", ";
-    ostream << point[i] << ")";
+    ostream << point[i] << ')';
+#endif
     return ostream;
 }
 
