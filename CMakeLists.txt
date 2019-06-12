@@ -25,7 +25,7 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 add_executable(ransac
-        src/samples/pico.cpp
+        src/samples/display.cpp
         src/main/ransac.h
 
         ${UTILITIES}

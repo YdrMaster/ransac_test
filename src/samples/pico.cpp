@@ -8,6 +8,9 @@
 #include "../utilities/stop_watch.hh"
 #include "../utilities/pico_sense.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
 int main() {
     pico_init_depth();
     std::cout << "started" << std::endl;
@@ -28,8 +31,7 @@ int main() {
     
         auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
     
-        std::vector<point_t<3>>    points{};
-        std::vector<PsBGR888Pixel> rgbs{};
+        std::vector<point_t<3>> points{};
         
         for (auto i : range_t<size_t>(0, n - 1)) {
             const auto x = static_cast<float>(i % depth_frame.width) - x0,
@@ -56,3 +58,5 @@ int main() {
                   << "fps:   " << 1.0 / _clock.seconds() << std::endl;
     }
 }
+
+#pragma clang diagnostic pop

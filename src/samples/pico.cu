@@ -30,9 +30,8 @@ int main() {
         auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
         auto rgb_data   = (PsBGR888Pixel *) rgb_frame.pFrameData;
     
-        std::vector<point_t<3>>    points{};
-        std::vector<PsBGR888Pixel> rgbs{};
-        
+        std::vector<point_t<3>> points{};
+
         for (auto i : range_t<size_t>(0, n - 1)) {
             const auto x = static_cast<float>(i % depth_frame.width) - x0,
                        y = y0 - static_cast<float>(i / depth_frame.width),
