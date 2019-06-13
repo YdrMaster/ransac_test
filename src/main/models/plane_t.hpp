@@ -6,6 +6,9 @@
 #define RANSAC_PLANE_T_HPP
 
 
+#include <array>
+#include <vector>
+
 #include "macro.h"
 #include "model_t.hpp"
 
