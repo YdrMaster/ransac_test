@@ -8,7 +8,7 @@
 
 #include <random>
 
-template<class t>
+template<class t = float>
 class random_engine {
     static_assert(
         std::is_integral<t>::value || std::is_floating_point<t>::value,

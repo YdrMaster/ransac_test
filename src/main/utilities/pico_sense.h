@@ -18,7 +18,7 @@ void pico_init_depth() {
     
     PsOpenDevice(0);
     PsSetDepthRange(0, PsNearRange);
-    PsSetDataMode(0, PsDepth_60);
+    PsSetDataMode(0, PsWDR_Depth);
 }
 
 void pico_init_fusion() {

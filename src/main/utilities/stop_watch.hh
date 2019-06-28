@@ -15,7 +15,7 @@ class stop_watch {
 public:
     stop_watch();
     
-    double seconds() const;
+    [[nodiscard]] double seconds() const;
     
     void reset();
 };
