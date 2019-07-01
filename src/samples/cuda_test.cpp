@@ -47,19 +47,22 @@ int main() {
         auto depth_data = (PsDepthPixel *) depth_frame.pFrameData;
         auto rgb_data   = (PsBGR888Pixel *) rgb_frame.pFrameData;
         
-        cloud->clear();
+        cloud->resize(n);
+        cloud->height   = depth_frame.height;
+        cloud->width    = depth_frame.width;
+        cloud->is_dense = false;
         for (auto i : range_t<size_t>(0, n - 1)) {
             const auto z = static_cast<float>(-depth_data[i]);
-            if (z >= 0) continue;
+            //if (z >= 0) continue;
             
             pcl::PointXYZRGB point;
             point.x = static_cast<float>(i % depth_frame.width) - x0;
             point.y = y0 - static_cast<float>(i / depth_frame.width);
-            point.z = z;
+            point.z = z >= 0 ? NAN : z;
             point.r = rgb_data[i].r;
             point.g = rgb_data[i].g;
             point.b = rgb_data[i].b;
-            cloud->push_back(point);
+            cloud->points[i] = point;
         }
         
         auto result = ransac_cuda(cloud, 1024, 10, 0.75);
@@ -83,15 +86,15 @@ int main() {
             ++i;
         }
         std::cout << data[i] << " == 0" << std::endl;
-        
-        //        std::vector<int> inliers{};
-        //        plane_t::Ptr(new plane_t(cloud))->selectWithinDistance(plane, 20, inliers);
-        //
-        //        for (auto j : inliers) {
-        //            cloud->points[j].r = 0;
-        //            cloud->points[j].g = 128;
-        //            cloud->points[j].b = 0;
-        //        }
+    
+        std::vector<int> inliers{};
+        plane_t::Ptr(new plane_t(cloud))->selectWithinDistance(plane, 20, inliers);
+    
+        for (auto j : inliers) {
+            cloud->points[j].r = 0;
+            cloud->points[j].g = 128;
+            cloud->points[j].b = 0;
+        }
         
         viewer.showCloud(cloud);
     }
